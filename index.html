@@ -1,0 +1,30 @@
+{{ define "content" }}
+
+<input
+  type="text"
+  id="searchInput"
+  placeholder="Rechercher un artiste, un lieu ou une date"
+  onkeyup="rechercher()"
+/>
+
+<hr>
+
+<div id="resultats"></div>
+
+<script>
+let tableauAvecTousLesArtistes = []
+</script>
+
+{{ range .Artists }}
+<script>
+tableauAvecTousLesArtistes.push({
+    id: {{ .Id }},
+    name: "{{ .Name }}",
+    relations: {{ .Relations.DatesLocations | json }}
+})
+</script>
+{{ end }}
+
+<script src="/static/script.js"></script>
+
+{{ end }}
