@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur {{ .Code }} - Groupie Tracker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="/">🎵 Groupie Tracker</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container error-page">
+        <div class="error-container">
+            <h1 class="error-code">{{ .Code }}</h1>
+            <h2 class="error-message">{{ .Message }}</h2>
+            <p class="error-description">
+                {{ if eq .Code 404 }}
+                La page que vous recherchez semble avoir disparu dans les coulisses...
+                {{ else if eq .Code 500 }}
+                Notre serveur a fait une fausse note. Nos techniciens sont sur le coup !
+                {{ else }}
+                Une erreur inattendue s'est produite.
+                {{ end }}
+            </p>
+            <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Groupie Tracker - Projet Ynov</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Groupie Tracker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="/">🎵 Groupie Tracker</a>
+                </div>
+                <div class="search-container">
+                    <form action="/search" method="GET" id="search-form">
+                        <input type="text" 
+                               name="q" 
+                               id="search-input" 
+                               placeholder="Rechercher un artiste, membre, location..." 
+                               autocomplete="off"
+                               value="{{ .Query }}">
+                        <div id="suggestions" class="suggestions"></div>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        {{ if .Filtered }}
+        <div class="filter-notice">
+            <p>✓ Filtres appliqués - <a href="/">Réinitialiser</a></p>
+        </div>
+        {{ end }}
+
+        {{ if .Query }}
+        <div class="search-notice">
+            <p>Résultats pour : <strong>{{ .Query }}</strong> ({{ len .Artists }} résultat(s))</p>
+        </div>
+        {{ end }}
+
+        <div class="main-content">
+            <aside class="filters">
+                <h2>🎛️ Filtres</h2>
+                <form action="/filter" method="POST" id="filter-form">
+                    
+                    <!-- Filtre par date de création -->
+                    <div class="filter-section">
+                        <h3>Date de création</h3>
+                        <div class="range-filter">
+                            <label>De: <input type="number" name="creation_min" min="{{ .MinCreation }}" max="{{ .MaxCreation }}" placeholder="{{ .MinCreation }}"></label>
+                            <label>À: <input type="number" name="creation_max" min="{{ .MinCreation }}" max="{{ .MaxCreation }}" placeholder="{{ .MaxCreation }}"></label>
+                        </div>
+                    </div>
+
+                    <!-- Filtre par premier album -->
+                    <div class="filter-section">
+                        <h3>Premier album</h3>
+                        <div class="range-filter">
+                            <label>De: <input type="number" name="album_min" min="{{ .MinAlbum }}" max="{{ .MaxAlbum }}" placeholder="{{ .MinAlbum }}"></label>
+                            <label>À: <input type="number" name="album_max" min="{{ .MinAlbum }}" max="{{ .MaxAlbum }}" placeholder="{{ .MaxAlbum }}"></label>
+                        </div>
+                    </div>
+
+                    <!-- Filtre par nombre de membres -->
+                    <div class="filter-section">
+                        <h3>Nombre de membres</h3>
+                        <div class="range-filter">
+                            <label>Min: <input type="number" name="members_min" min="{{ .MinMembers }}" max="{{ .MaxMembers }}" placeholder="{{ .MinMembers }}"></label>
+                            <label>Max: <input type="number" name="members_max" min="{{ .MinMembers }}" max="{{ .MaxMembers }}" placeholder="{{ .MaxMembers }}"></label>
+                        </div>
+                    </div>
+
+                    <!-- Filtre par locations -->
+                    <div class="filter-section">
+                        <h3>Locations (pays)</h3>
+                        <div class="checkbox-filter">
+                            {{ range $index, $location := .AllLocations }}
+                            {{ if lt $index 10 }}
+                            <label>
+                                <input type="checkbox" name="locations" value="{{ $location }}">
+                                {{ $location }}
+                            </label>
+                            {{ end }}
+                            {{ end }}
+                        </div>
+                        <button type="button" id="show-more-locations" class="btn-link">Voir plus...</button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Appliquer les filtres</button>
+                    <a href="/" class="btn btn-secondary">Réinitialiser</a>
+                </form>
+            </aside>
+
+            <section class="artists-grid">
+                {{ if .Artists }}
+                {{ range .Artists }}
+                <article class="artist-card">
+                    <a href="/artist/{{ .ID }}">
+                        <div class="artist-image">
+                            <img src="{{ .Image }}" alt="{{ .Name }}" loading="lazy">
+                            <div class="artist-overlay">
+                                <span class="view-details">Voir détails →</span>
+                            </div>
+                        </div>
+                        <div class="artist-info">
+                            <h3>{{ .Name }}</h3>
+                            <div class="artist-meta">
+                                <span class="meta-item">👥 {{ len .Members }} membre(s)</span>
+                                <span class="meta-item">📅 {{ .CreationDate }}</span>
+                                <span class="meta-item">💿 {{ .FirstAlbum }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+                {{ end }}
+                {{ else }}
+                <div class="no-results">
+                    <h2>😕 Aucun résultat</h2>
+                    <p>Aucun artiste ne correspond à vos critères de recherche ou de filtrage.</p>
+                    <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+                </div>
+                {{ end }}
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Groupie Tracker - Projet Ynov</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/search.js"></script>
+    <script src="/static/js/filters.js"></script>
+</body>
+</html>

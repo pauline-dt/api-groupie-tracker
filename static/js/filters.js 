@@ -1,0 +1,86 @@
+// Gestion des filtres
+const showMoreLocationsBtn = document.getElementById('show-more-locations');
+const checkboxFilter = document.querySelector('.checkbox-filter');
+
+if (showMoreLocationsBtn && checkboxFilter) {
+    let expanded = false;
+
+    showMoreLocationsBtn.addEventListener('click', function() {
+        const allLabels = checkboxFilter.querySelectorAll('label');
+        
+        if (!expanded) {
+            // Afficher toutes les locations
+            allLabels.forEach(label => {
+                label.style.display = 'block';
+            });
+            showMoreLocationsBtn.textContent = 'Voir moins...';
+            expanded = true;
+        } else {
+            // Masquer les locations après les 10 premières
+            allLabels.forEach((label, index) => {
+                if (index >= 10) {
+                    label.style.display = 'none';
+                }
+            });
+            showMoreLocationsBtn.textContent = 'Voir plus...';
+            expanded = false;
+        }
+    });
+
+    // Masquer initialement les locations après les 10 premières
+    const allLabels = checkboxFilter.querySelectorAll('label');
+    allLabels.forEach((label, index) => {
+        if (index >= 10) {
+            label.style.display = 'none';
+        }
+    });
+}
+
+// Validation du formulaire de filtres
+const filterForm = document.getElementById('filter-form');
+if (filterForm) {
+    filterForm.addEventListener('submit', function(e) {
+        const creationMin = parseInt(filterForm.querySelector('[name="creation_min"]').value) || 0;
+        const creationMax = parseInt(filterForm.querySelector('[name="creation_max"]').value) || 9999;
+        const albumMin = parseInt(filterForm.querySelector('[name="album_min"]').value) || 0;
+        const albumMax = parseInt(filterForm.querySelector('[name="album_max"]').value) || 9999;
+        const membersMin = parseInt(filterForm.querySelector('[name="members_min"]').value) || 0;
+        const membersMax = parseInt(filterForm.querySelector('[name="members_max"]').value) || 9999;
+
+        // Validation des plages
+        if (creationMin > creationMax) {
+            e.preventDefault();
+            alert('La date de création minimum ne peut pas être supérieure à la date maximum.');
+            return;
+        }
+
+        if (albumMin > albumMax) {
+            e.preventDefault();
+            alert('L\'année de premier album minimum ne peut pas être supérieure à l\'année maximum.');
+            return;
+        }
+
+        if (membersMin > membersMax) {
+            e.preventDefault();
+            alert('Le nombre de membres minimum ne peut pas être supérieur au nombre maximum.');
+            return;
+        }
+    });
+}
+
+// Amélioration UX: highlight des filtres actifs
+const filterInputs = document.querySelectorAll('.filters input[type="number"], .filters input[type="checkbox"]');
+filterInputs.forEach(input => {
+    input.addEventListener('change', function() {
+        if (this.type === 'number' && this.value) {
+            this.style.borderColor = 'var(--primary-color)';
+        } else if (this.type === 'checkbox' && this.checked) {
+            this.parentElement.style.color = 'var(--primary-color)';
+        } else {
+            this.style.borderColor = '';
+            if (this.type === 'checkbox') {
+                this.parentElement.style.color = '';
+            }
+        }
+    });
+});

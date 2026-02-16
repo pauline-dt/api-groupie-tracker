@@ -1,0 +1,128 @@
+
+const searchInput = document.getElementById('search-input');
+const suggestionsContainer = document.getElementById('suggestions');
+let debounceTimer;
+
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+
+        // Débouncer les requêtes pour éviter trop d'appels API
+        clearTimeout(debounceTimer);
+
+        if (query.length < 2) {
+            hideSuggestions();
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            fetchSuggestions(query);
+        }, 300);
+    });
+
+    // Fermer les suggestions en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+
+    // Navigation au clavier dans les suggestions
+    searchInput.addEventListener('keydown', function(e) {
+        const items = suggestionsContainer.querySelectorAll('.suggestion-item');
+        const activeItem = suggestionsContainer.querySelector('.suggestion-item.active');
+        let currentIndex = -1;
+
+        if (activeItem) {
+            currentIndex = Array.from(items).indexOf(activeItem);
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentIndex < items.length - 1) {
+                if (activeItem) activeItem.classList.remove('active');
+                items[currentIndex + 1].classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentIndex > 0) {
+                if (activeItem) activeItem.classList.remove('active');
+                items[currentIndex - 1].classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeItem) {
+                activeItem.click();
+            } else {
+                document.getElementById('search-form').submit();
+            }
+        } else if (e.key === 'Escape') {
+            hideSuggestions();
+        }
+    });
+}
+
+async function fetchSuggestions(query) {
+    try {
+        const response = await fetch(`/api/suggestions?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Erreur réseau');
+
+        const suggestions = await response.json();
+        displaySuggestions(suggestions);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des suggestions:', error);
+        hideSuggestions();
+    }
+}
+
+function displaySuggestions(suggestions) {
+    if (!suggestions || suggestions.length === 0) {
+        hideSuggestions();
+        return;
+    }
+
+    suggestionsContainer.innerHTML = '';
+
+    suggestions.forEach(suggestion => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+        item.innerHTML = `
+            <span class="suggestion-value">${highlightMatch(suggestion.value, searchInput.value)}</span>
+            <span class="suggestion-type">${suggestion.type}</span>
+        `;
+
+        item.addEventListener('click', function() {
+            if (suggestion.type === 'artist/band' || suggestion.type === 'member') {
+                window.location.href = `/artist/${suggestion.id}`;
+            } else {
+                searchInput.value = suggestion.value;
+                document.getElementById('search-form').submit();
+            }
+        });
+
+        item.addEventListener('mouseenter', function() {
+            document.querySelectorAll('.suggestion-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+
+        suggestionsContainer.appendChild(item);
+    });
+
+    suggestionsContainer.classList.add('active');
+}
+
+function highlightMatch(text, query) {
+    if (!query) return text;
+
+    const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+    return text.replace(regex, '<strong>$1</strong>');
+}
+
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function hideSuggestions() {
+    suggestionsContainer.classList.remove('active');
+    suggestionsContainer.innerHTML = '';
+}

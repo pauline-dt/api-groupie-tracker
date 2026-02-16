@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Name }} - Groupie Tracker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="/">🎵 Groupie Tracker</a>
+                </div>
+                <a href="/" class="btn-back">← Retour</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container artist-detail">
+        <div class="artist-header">
+            <div class="artist-header-image">
+                <img src="{{ .Image }}" alt="{{ .Name }}">
+            </div>
+            <div class="artist-header-info">
+                <h1>{{ .Name }}</h1>
+                <div class="artist-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Date de création</span>
+                        <span class="stat-value">{{ .CreationDate }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Premier album</span>
+                        <span class="stat-value">{{ .FirstAlbum }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Membres</span>
+                        <span class="stat-value">{{ len .Members }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="artist-content">
+            <section class="members-section">
+                <h2>👥 Membres du groupe</h2>
+                <ul class="members-list">
+                    {{ range .Members }}
+                    <li class="member-item">{{ . }}</li>
+                    {{ end }}
+                </ul>
+            </section>
+
+            <section class="concerts-section">
+                <h2>🎤 Concerts et tournées</h2>
+                
+                <div class="map-container">
+                    <div id="map"></div>
+                    <p class="map-note">📍 Cliquez sur les marqueurs pour voir les dates des concerts</p>
+                </div>
+
+                <div class="concerts-list">
+                    <h3>Dates et lieux</h3>
+                    {{ if .DatesLocations }}
+                    {{ range $location, $dates := .DatesLocations }}
+                    <div class="concert-item">
+                        <div class="concert-location">
+                            <span class="location-icon">📍</span>
+                            <span class="location-name">{{ $location }}</span>
+                        </div>
+                        <div class="concert-dates">
+                            {{ range $dates }}
+                            <span class="concert-date">{{ . }}</span>
+                            {{ end }}
+                        </div>
+                    </div>
+                    {{ end }}
+                    {{ else }}
+                    <p class="no-concerts">Aucune date de concert disponible.</p>
+                    {{ end }}
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Groupie Tracker - Projet Ynov</p>
+        </div>
+    </footer>
+
+    <script>
+        // Données pour la carte
+        const artistData = {
+            name: "{{ .Name }}",
+            locations: [
+                {{ range $location, $dates := .DatesLocations }}
+                {
+                    location: "{{ $location }}",
+                    dates: [{{ range $dates }}"{{ . }}",{{ end }}]
+                },
+                {{ end }}
+            ]
+        };
+    </script>
+    <script src="/static/js/map.js"></script>
+</body>
+</html>
